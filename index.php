@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" href="../style.css">
  </head>
  <body>
-<script language="JavaScript" src="http://www.chrissyx.com/beta/liste/extern.php?id=1"></script>
+<script language="JavaScript" src="extern.php?id=1"></script>
 
 siehe oben
 

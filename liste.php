@@ -29,7 +29,8 @@
    $iparray = fread($temp, filesize("ip.dat"));
    fclose($temp);
    $iparray = explode("\n", $iparray);
-   foreach ($iparray as $temp) if ($temp == "") array_pop($iparray);
+   if ($iparray[count($iparray)-1] == "") array_pop($iparray);
+//   foreach ($iparray as $temp) if ($temp == "") array_pop($iparray);
    $iparray[count($iparray)] = $_SERVER['REMOTE_ADDR'];
    $ip_towrite = implode("\n", $iparray);
    $temp = fopen("ip.dat", "w");
@@ -87,8 +88,7 @@
 #
 ###---AB GEHT'S!---###
 #
- $action = $_POST['action'];
- if (!$action) $action = $_GET['action'];
+ $action = (!$_POST['action']) ? $_GET['action'] : $_POST['action'];
  $mode = $_POST['mode'];
  $id = $_GET['id'];
  if (file_exists("ip.dat"))
@@ -97,7 +97,7 @@
   $iparray = fread($temp, filesize("ip.dat"));
   fclose($temp);
   $iparray = explode("\n", $iparray);
-  foreach ($iparray as $temp) if ($temp == "") array_pop($iparray);
+  if ($iparray[count($iparray)-1] == "") array_pop($iparray);
  }
  else $iparray = array("");
  global $iparray;
@@ -117,7 +117,8 @@
    exit;
   }
   $array = file("liste.dat");             //liste zeilenweise in $array einlesen
-  for ($i=0; $i<count($array); $i++)      //für jede zeile tue
+  $size = count($array);
+  for ($i=0; $i<$size; $i++)      //für jede zeile tue
   {
    $array2 = explode("\t", $array[$i]);    //die 5 werte auflösen
    $davor = $array2[2];
@@ -176,10 +177,11 @@
     $newarray[3] = $_POST['url'];
     $newarray[4] = "0";
     $newarray[5] = md5($_POST['pw']);
-    $newarray[6] = $_POST['bild'];
-    if ($newarray[6] == "") $newarray[6] = "nobanner.jpg";
+    $newarray[6] = ($_POST['bild'] == "") ? "nobanner.jpg" : $_POST['bild'];
+//    if ($newarray[6] == "") $newarray[6] = "nobanner.jpg";
     include("head.inc");
-    for ($i=0; $i<count($array); $i++)
+    $size = count($array);
+    for ($i=0; $i<$size; $i++)
     {
      $array2 = explode("\t", $array[$i]);
      $towrite .= implode("\t", $array2);
@@ -190,9 +192,9 @@
     fclose($temp);
     ?>
 
-   Registrierung abgeschlossen! <font color="red">Deine ID ist: <?php echo($newarray[1]); ?>!</font><br>
-   Um die Webringfrunktion zu nutzen, füge diesen Code in den Code deiner Seite unter dem <code>&lt;body></code> Tag ein:<br><br>
-   <code>&lt;script language="JavaScript" src="http://chrissyx.ch.funpic.de/extern.php?id=<?php echo($newarray[1]); ?>">&lt;/script></code><br><br>
+   Registrierung abgeschlossen! <font color="red">Deine ID ist: <?=$newarray[1]?>!</font><br>
+   Um die Webringfrunktion zu nutzen, füge diesen Code in den Code deiner Seite unter dem <code>&lt;body&gt;</code> Tag ein:<br><br>
+   <code>&lt;script language="JavaScript" src="http://chrissyx.s01.user-portal.com/extern.php?id=<?=$newarray[1]?>"&gt;&lt;/script&gt;</code><br><br>
    Klicke <a href="liste.php">hier</a>, um zur Liste zu gelangen.<br><br>
 
     <?php
@@ -309,13 +311,13 @@
    {
     include("head.inc");
     $array = file("liste.dat");
-    for ($i=0; $i<count($array); $i++)
+    $size = count($array);
+    for ($i=0; $i<$size; $i++)
     {
      $array2 = explode("\t", $array[$i]);
      if ($_POST['login_id'] == $array2[1]) $i = count($array);
     }
-//    if ((md5($_POST['login_pw']) != $array2[5]) or ($_POST['login_id'] == "") or ($_POST['login_id'] > count($array)))
-    if ((md5($_POST['login_pw']) != $array2[5]) or ($_POST['login_id'] == ""))
+    if ((md5($_POST['login_pw']) != $array2[5]) or ($_POST['login_id'] == "") or ($_POST['login_id'] > count($array)))
     {
      echo("Falsches Passwort oder Cookiefehler!<br><br>");
      include("tail.inc");
@@ -330,27 +332,27 @@
 
    <tr>
     <td>Nummer/ID:</td>
-    <td><?php echo($array2[1]); ?></td>
+    <td><?=$array2[1]?></td>
    </tr>
    <tr>
     <td>Seitenname:</td>
-    <td><input type="text" name="name" value="<?php echo($array2[0]); ?>"></td>
+    <td><input type="text" name="name" value="<?=$array2[0]?>"></td>
    </tr>
    <tr>
     <td>Hits:</td>
-    <td><?php echo($array2[4]); ?></td>
+    <td><?=$array2[4]?></td>
    </tr>
    <tr>
     <td>Votes:</td>
-    <td><?php echo($array2[2]); ?></td>
+    <td><?=$array2[2]?></td>
    </tr>
    <tr>
     <td>Adresse:</td>
-    <td><input type="text" name="url" value="<?php echo($array2[3]); ?>"></td>
+    <td><input type="text" name="url" value="<?=$array2[3]?>"></td>
    </tr>
    <tr>
     <td>Bannerpfad:</td>
-    <td><input type="text" name="bild" value="<?php echo($array2[6]); ?>"></td>
+    <td><input type="text" name="bild" value="<?=$array2[6]?>"></td>
    </tr>
    <tr>
     <td colspan="2"><font size="2">Passwort ändern? Ansonsten Feld frei lassen!</font></td>
@@ -365,14 +367,14 @@
   <br>
   <input type="submit" value="Aktualisieren"> <input type="button" value="Abbrechen" onClick="javascript:document.location.href='liste.php';"><br><br>
   <input type="hidden" name="action" value="update">
-  <input type="hidden" name="id" value="<?php echo($array2[1]); ?>">
-  <input type="hidden" name="votes" value="<?php echo($array2[2]); ?>">
-  <input type="hidden" name="hits" value="<?php echo($array2[4]); ?>">
+  <input type="hidden" name="id" value="<?=$array2[1]?>">
+  <input type="hidden" name="votes" value="<?=$array2[2]?>">
+  <input type="hidden" name="hits" value="<?=$array2[4]?>">
   </form>
   <form action="liste.php" method="post">
   <input type="submit" value="Account löschen" onClick="return confirm('Sicher? Alle Daten werden gelöscht! Auch deine Votes!');"><br>
   <input type="hidden" name="action" value="kill">
-  <input type="hidden" name="id" value="<?php echo($array2[1]); ?>">
+  <input type="hidden" name="id" value="<?=$array2[1]?>">
   </form>
 
     <?php
@@ -419,16 +421,17 @@
    $anz_votes = 0;
    $anz_hits = 0;
    $array = file("liste.dat");
-   for ($i=0; $i<count($array); $i++)
+   $size = count($array);
+   for ($i=0; $i<$size; $i++)
    {
     $array2 = explode("\t", $array[$i]);
-    $anz_votes = $anz_votes + $array2[2];
-    $anz_hits = $anz_hits + $array2[4];
+    $anz_votes += $array2[2];
+    $anz_hits += $array2[4];
     $anz_acc++;
    }
-   echo("  Es sind insgesamt " . $anz_acc . " Seiten in der Liste.<br>
-  Es wurde insgesamt " . $anz_votes . " Mal abgestimmt.<br>
-  Es gibt insgesamt " . $anz_hits . " Hits.<br><br>");
+   echo("  Es sind insgesamt $anz_acc Seiten in der Liste.<br>
+  Es wurde insgesamt $anz_votes Mal abgestimmt.<br>
+  Es gibt insgesamt $anz_hits Hits.<br><br>");
    include("tail.inc");
   }
 
@@ -439,7 +442,8 @@
   {
    include("head.inc");
    $array = file("liste.dat");
-   for ($i=0; $i<count($array); $i++)
+   $size = count($array);
+   for ($i=0; $i<$size; $i++)
    {
     $array2 = explode("\t", $array[$i]);
     if ($_POST['id'] == $array2[1])
@@ -452,7 +456,7 @@
      if ($_POST['pw']) $array2[5] = md5($_POST['pw']);
      $array2[6] = $_POST['bild'] . "\n";
     }
-    $towrite = $towrite . implode("\t", $array2);
+    $towrite .= implode("\t", $array2);
    }
    $temp = fopen("liste.dat", "w");
    fwrite($temp, $towrite);
@@ -468,7 +472,8 @@
   {
    include("head.inc");
    $array = file("liste.dat");
-   for ($i=0; $i<count($array); $i++)
+   $size = count($array);
+   for ($i=0; $i<$size; $i++)
    {
     $array2 = explode("\t", $array[$i]);
     if ($_POST['id'] != $array2[1]) $towrite .= implode("\t", $array2);
@@ -487,7 +492,8 @@
   {
    $id = $_GET['hit_id'];
    $array = file("liste.dat");
-   for ($i=0; $i<count($array); $i++)
+   $size = count($array);
+   for ($i=0; $i<$size; $i++)
    {
     $array2 = explode("\t", $array[$i]);
     if ($id == $array2[1]) $array2[4]++;
@@ -515,7 +521,8 @@
     include("tail.inc");
     exit;
    }
-   for ($i=0; $i<count($array); $i++)
+   $size = count($array);
+   for ($i=0; $i<$size; $i++)
    {
     $array2 = explode("\t", $array[$i]);
     /*------------------------------------------------------------------*\
@@ -526,11 +533,11 @@
   <tr>
    <td><?php echo($array2[0] . "\n"); ?></td>
    <td>Nummer/ID: <?php echo($array2[1] . "\n"); ?></td>
-   <td>Hits: <?php echo($array2[4]); ?></td>
+   <td>Hits: <?=$array2[4]?></td>
    <td>Votes: <?php echo($array2[2] . "\n"); ?></td>
   </tr>
   <tr>
-   <td colspan="4"><a href="<?php echo($array2[3]); ?>" target="_blank" onClick="javascript:document.location.href('liste.php?action=hits&hit_id=<?php echo($array2[1]); ?>');"><img src="<?php echo($array2[6]); ?>" border="0" width="468" height="60" alt="<?php echo($array2[0]); ?>"></a></td>
+   <td colspan="4"><a href="<?=$array2[3]?>" target="_blank" onClick="javascript:document.location.href('liste.php?action=hits&hit_id=<?=$array2[1]?>');"><img src="<?=$array2[6]?>" border="0" width="468" height="60" alt="<?=$array2[0]?>"></a></td>
   </tr>
   <tr>
    <td height="10" colspan="4"></td>
